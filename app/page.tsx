@@ -1,18 +1,29 @@
 "use client";
 
+import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { MobileNav } from "@/components/mobile-nav";
 import ConnectEmail from "./ConnectEmail";
-import { useEffect, useState, useRef } from "react";
 
 export default function HomePage() {
   const [isLoading, setIsLoading] = useState(true);
   const nameRef = useRef<HTMLHeadingElement>(null);
   const navNameRef = useRef<HTMLAnchorElement>(null);
 
+  // Store x and y position for animation after mount
+  const [pos, setPos] = useState({ x: 0, y: 0 });
+
   useEffect(() => {
+    if (navNameRef.current) {
+      const navRect = navNameRef.current.getBoundingClientRect();
+      setPos({
+        x: -window.innerWidth / 2 + navRect.left + navRect.width / 2,
+        y: -window.innerHeight / 2 + 50, // Adjust to your navbar height
+      });
+    }
+
     const timer = setTimeout(() => setIsLoading(false), 1500);
     return () => clearTimeout(timer);
   }, []);
@@ -41,20 +52,8 @@ export default function HomePage() {
             className="fixed inset-0 z-50 flex items-center justify-center bg-[#E8E0D4]"
           >
             <motion.div
-              initial={{
-                scale: 0.8,
-                x: 0,
-                y: 0,
-              }}
-              animate={{
-                scale: 1,
-                x: navNameRef.current
-                  ? -window.innerWidth / 2 +
-                    navNameRef.current.getBoundingClientRect().left +
-                    navNameRef.current.offsetWidth / 2
-                  : 0,
-                y: -window.innerHeight / 2 + 50, // Adjust this value to match your navbar height
-              }}
+              initial={{ scale: 0.8, x: 0, y: 0 }}
+              animate={{ scale: 1, x: pos.x, y: pos.y }}
               transition={{
                 type: "spring",
                 damping: 15,
@@ -127,7 +126,7 @@ export default function HomePage() {
               <ConnectEmail />
             </motion.header>
 
-            {/* Rest of your content */}
+            {/* Main Content */}
             <motion.main
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
